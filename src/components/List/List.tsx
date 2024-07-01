@@ -60,7 +60,7 @@ const List: FC<TListProps> = ({ list, boardId }) => {
             <div
               key={task.taskId}
               onClick={() =>
-                handleTaskChange(boardId, list.listId, task.taskId, task)
+                handleTaskChange(boardId, list.listId, task)
               }
             >
               <Task
