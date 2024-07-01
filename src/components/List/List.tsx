@@ -34,7 +34,6 @@ const List: FC<TListProps> = ({ list, boardId }) => {
   const handleTaskChange = (
     boardId: string,
     listId: string,
-    taskId: string,
     task: ITask
   ) => {
     dispatch(setModalData({ boardId, listId, task }));
