@@ -1,5 +1,6 @@
 import { FC } from "react";
 import { description, taskContainer, title } from "./Task.css";
+import { Draggable } from "react-beautiful-dnd";
 
 type TTaskProps = {
   index: number;
@@ -17,10 +18,19 @@ const Task: FC<TTaskProps> = ({
   taskDescription,
 }) => {
   return (
-    <div className={taskContainer}>
-      <div className={title}>{taskName}</div>
-      <div className={description}>{taskDescription}</div>
-    </div>
+    <Draggable draggableId={id} index={index}>
+      {(provided) => (
+        <div
+          className={taskContainer}
+          ref={provided.innerRef}
+          {...provided.draggableProps}
+          {...provided.dragHandleProps}
+        >
+          <div className={title}>{taskName}</div>
+          <div className={description}>{taskDescription}</div>
+        </div>
+      )}
+    </Draggable>
   );
 };
 

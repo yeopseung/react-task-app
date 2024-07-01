@@ -7,13 +7,14 @@ import {
   loggerButton,
 } from "./App.css";
 import BoardList from "./components/BoardList/BoardList";
-import ListContainer from "./components/ListContainer/ListsContainer";
 import { useTypedDispatch, useTypedSelector } from "./hooks/redux";
 import EditModal from "./components/EditModal/EditModal";
 import LoggerModal from "./components/LoggerModal/LoggerModal";
-import { deleteBoard } from "./store/slices/boardsSlice";
+import { deleteBoard, sort } from "./store/slices/boardsSlice";
 import { addLog } from "./store/slices/loggerSlice";
 import { v4 } from "uuid";
+import { DragDropContext } from "react-beautiful-dnd";
+import ListContainer from "./components/ListContainer/ListsContainer";
 
 function App() {
   const dispatch = useTypedDispatch();
@@ -59,6 +60,38 @@ function App() {
     }
   };
 
+  const handleDragEnd = (result: any) => {
+    const { destination, source, draggableId } = result;
+    const sourceList = lists.filter(
+      (list) => list.listId === source.droppableId
+    )[0];
+
+    dispatch(
+      sort({
+        boardIndex: boards.findIndex(
+          (board) => board.boardId === activeBoardId
+        ),
+        droppableIdStart: source.droppableId,
+        droppableIdEnd: destination.droppableId,
+        droppableIndexStart: source.index,
+        droppableIndexEnd: destination.index,
+        draggableId,
+      })
+    );
+
+    dispatch(
+      addLog({
+        logId: v4(),
+        logMessage: `
+        리스트 ${sourceList.listName}에서 
+        리스트 ${lists.filter((list) => list.listId === destination.droppableId[0].listName)}로 
+        ${sourceList.tasks.filter((task) => task.taskId === draggableId)[0].taskName}을 옮김.`,
+        logAuthor: "User",
+        logTimestamp: String(Date.now()),
+      })
+    );
+  };
+
   return (
     <div className={appContainer}>
       {isLoggerOpen ? <LoggerModal setIsLoggerOpen={setIsLoggerOpen} /> : null}
@@ -68,7 +101,9 @@ function App() {
         setActiveBoardId={setActiveBoardId}
       />
       <div className={board}>
-        <ListContainer lists={lists} boardId={getActiveBoard.boardId} />
+        <DragDropContext onDragEnd={handleDragEnd}>
+          <ListContainer lists={lists} boardId={getActiveBoard.boardId} />
+        </DragDropContext>
       </div>
       <div className={buttons}>
         <button className={deleteBoardButton} onClick={handleDeleteBoard}>
